@@ -18,7 +18,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 let lookup = {}
 
-const hostname = '127.0.0.1';
+const hostname = '0.0.0.0';
 const port = 3000;
 
 
@@ -128,4 +128,4 @@ app.get('/peers', function(req, res) {
   res.send(lookup);
 });
 
-app.listen(6069);
+app.listen(3001);
