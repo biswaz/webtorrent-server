@@ -1,4 +1,22 @@
 const util = require('util')
+ 
+var express = require('express');
+var bodyParser = require('body-parser');
+var app = express();
+
+//Allow all requests from all domains & localhost
+app.all('/*', function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Methods", "POST, GET");
+  next();
+});
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
+
+
+let lookup = {}
 
 const hostname = '127.0.0.1';
 const port = 3000;
@@ -30,6 +48,7 @@ var server = new Server({
       // If the callback is passed an `Error` object, the torrent will be disallowed
       // and the error's `message` property will be given as the reason.
     //   cb(new Error('disallowed torrent'))
+    //   console.log(util.inspect(params, false, null, true))
       cb(null)
     }
   }
@@ -63,16 +82,30 @@ server.listen(port, hostname, 'listening')
 
 server.on('start', function (addr) {
   console.log('got start message from ' + addr)
+  Object.keys(server.torrents).forEach(hash => {
+    lookup[server.torrents[hash].infoHash] = server.torrents[hash].peers.length
+    
+    // console.log(util.inspect(server.torrents[hash].peers, false, null, true))
+    console.log("peers: " + server.torrents[hash].peers.length)
+  });
 //   console.log(Object.keys(server.torrents))
 //   console.log("update")
-//   Object.keys(server.torrents).forEach(hash => {
-//       console.log("Torrent info: ")
-//       console.log(util.inspect(server.torrents[hash], false, null, true))
-//   });
+  // Object.keys(server.torrents).forEach(hash => {
+  //     console.log("peers: ")
+  //     console.log(util.inspect(server.torrents[hash].peers, false, null, true))
+  //   console.log("peers: " + server.torrents[hash].peers.length)
+  // });
 })
 
 server.on('complete', function (addr) {})
 server.on('update', function (addr) {
+    Object.keys(server.torrents).forEach(hash => {
+      console.log(server.torrents[hash].infoHash)
+      lookup[server.torrents[hash].infoHash] = server.torrents[hash].peers.length
+
+      // console.log(util.inspect(server.torrents[hash].peers, false, null, true))
+      console.log("peers: " + server.torrents[hash].peers.length)
+    });
 })
 server.on('stop', function (addr) {})
 
@@ -89,3 +122,10 @@ server.on('stop', function (addr) {})
 
 // // get the peers who are in a particular torrent swarm
 // server.torrents[infoHash].peers
+
+
+app.get('/peers', function(req, res) {
+  res.send(lookup);
+});
+
+app.listen(6069);
