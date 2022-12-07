@@ -18,6 +18,6 @@
   "homepage": "https://github.com/biswaz/webtorrent-server#readme",
   "dependencies": {
     "bittorrent-tracker": "^9.14.4",
-    "express": "^4.17.1"
+    "express": "^4.18.2"
   }
 }
